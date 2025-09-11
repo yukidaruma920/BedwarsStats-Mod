@@ -1,25 +1,22 @@
 {
 	"schemaVersion": 1,
-	"id": "modid",
-	"version": "${version}",
-	"name": "Example mod",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"id": "bedwarsstats",
+	"version": "1.2.1",
+	"name": "Bedwars Stats",
+	"description": "Displays Bedwars stats for players from the /who command.",
 	"authors": [
-		"Me!"
+		"yuki920"
 	],
-	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
-	},
+	"contact": {},
 	"license": "CC0-1.0",
-	"icon": "assets/modid/icon.png",
-	"environment": "*",
+	"icon": "assets/bedwarsstats/icon.png",
+	"environment": "client",
 	"entrypoints": {
 		"main": [
-			"com.example.ExampleMod"
+			"com.yuki920.bedwarsstats.BedwarsStatsMod"
 		],
 		"client": [
-			"com.example.ExampleModClient"
+			"com.yuki920.bedwarsstats.BedwarsStatsClient"
 		]
 	},
 	"mixins": [
@@ -31,7 +28,7 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.16.14",
-		"minecraft": "~1.21.8",
+		"minecraft": "~1.21",
 		"java": ">=21",
 		"fabric-api": "*"
 	},
