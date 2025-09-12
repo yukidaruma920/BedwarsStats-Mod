@@ -42,6 +42,16 @@ public class HypixelApiHandler {
                 String hypixelResponse = sendHttpRequest(hypixelUrl, apiKey);
                 if (hypixelResponse == null) return;
                 JsonObject hypixelJson = GSON.fromJson(hypixelResponse, JsonObject.class);
+
+                // ★★★ 4. 無効なAPIキーの警告 (メッセージ修正版) ★★★
+                if (hypixelJson != null && !hypixelJson.get("success").getAsBoolean()) {
+                    if (hypixelJson.has("cause") && hypixelJson.get("cause").getAsString().equals("Invalid API key")) {
+                        sendMessageToPlayer("§cYour Hypixel API key is invalid!");
+                        sendMessageToPlayer("§ePlease get a new one from the Hypixel Developer Dashboard:");
+                        sendMessageToPlayer("§bhttps://developer.hypixel.net/");
+                        return; // 処理を中断
+                    }
+                }
                 
                 if (hypixelJson == null || !hypixelJson.has("player") || hypixelJson.get("player").isJsonNull()) {
                     sendMessageToPlayer("§e" + username + " §ris nicked, stats cannot be retrieved.");
@@ -67,6 +77,27 @@ public class HypixelApiHandler {
         return String.format("%,d", number);
     }
 
+    // ★★★ 2. Statsごとの色付け用ヘルパーメソッド ★★★
+    private static String getFkdrColor(double fkdr) {
+        if (fkdr >= 10) return "§4"; // Dark Red
+        if (fkdr >= 8) return "§c"; // Red
+        if (fkdr >= 6) return "§6"; // Gold
+        if (fkdr >= 4) return "§e"; // Yellow
+        if (fkdr >= 2) return "§2";  // Dark Green
+        if (fkdr >= 1) return "§a";  // Green
+        return "§a"; // Green
+    }
+    
+    private static String getWlrColor(double wlr) {
+        if (wlr >= 5) return "§4"; // Dark Red
+        if (wlr >= 4) return "§c"; // Red
+        if (wlr >= 3) return "§6"; // Gold
+        if (wlr >= 2) return "§e"; // Yellow
+        if (wlr >= 1) return "§2";  // Dark Green
+        if (wlr >= 0.5) return "§a";  // Green
+        return "§a"; // Green
+    }
+
     // ★★★ 2. formatStatsメソッドを新しい仕様に完全に更新 ★★★
     private static String formatStats(JsonObject player) {
         String username = player.get("displayname").getAsString();
@@ -90,15 +121,19 @@ public class HypixelApiHandler {
         
         String prestige = PrestigeFormatter.formatPrestige(stars);
 
+        // ★★★ 2. Statsごとの色付けを適用 ★★★
+        String wlrColor = getWlrColor(wlr);
+        String fkdrColor = getFkdrColor(fkdr);
+
         // 新しい出力形式
-        return String.format("%s %s%s§r: §aWins §f%s §7| §aWLR §f%.2f §7| §aFinals §f%s §7| §aFKDR §f%.2f",
+        return String.format("%s %s%s§r: §aWins §f%s §7| §aWLR %s%.2f§f §7| §aFinals §f%s §7| §aFKDR %s%.2f§f",
                 prestige, 
                 rankPrefix, 
                 username, 
                 formatNumber(wins), 
-                wlr, 
+                wlrColor, wlr, 
                 formatNumber(finalKills), 
-                fkdr);
+                fkdrColor, fkdr);
     }
     
     // ★★★ 3. getRankPrefixメソッドを最新版に更新 ★★★
