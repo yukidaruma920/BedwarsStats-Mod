@@ -85,7 +85,7 @@ public class HypixelApiHandler {
         if (fkdr >= 4) return "§e"; // Yellow
         if (fkdr >= 2) return "§2";  // Dark Green
         if (fkdr >= 1) return "§a";  // Green
-        return "§a"; // Green
+        return "§f"; // Green
     }
     
     private static String getWlrColor(double wlr) {
@@ -95,7 +95,7 @@ public class HypixelApiHandler {
         if (wlr >= 2) return "§e"; // Yellow
         if (wlr >= 1) return "§2";  // Dark Green
         if (wlr >= 0.5) return "§a";  // Green
-        return "§a"; // Green
+        return "§f"; // Green
     }
 
     // ★★★ 2. formatStatsメソッドを新しい仕様に完全に更新 ★★★
