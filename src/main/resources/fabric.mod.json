@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "bedwarsstats",
-	"version": "1.3.1",
+	"version": "1.4.0",
 	"name": "Bedwars Stats",
 	"description": "Displays Bedwars stats for players from the /who command.",
 	"authors": [
@@ -17,7 +17,10 @@
 		],
 		"client": [
 			"com.yuki920.bedwarsstats.BedwarsStatsClient"
-		]
+		],
+		"modmenu": [
+    		"com.yuki920.bedwarsstats.config.ModMenuIntegration"
+  		]
 	},
 	"depends": {
 		"fabricloader": ">=0.16.14",
