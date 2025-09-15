@@ -3,7 +3,7 @@
 	"package": "com.yuki920.bedwarsstats.mixin.client",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-		"PlayerEntityRendererMixin"
+		"LivingEntityRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
