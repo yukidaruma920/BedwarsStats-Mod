@@ -2,6 +2,7 @@ package com.yuki920.bedwarsstats.commands;
 
 import com.yuki920.bedwarsstats.HypixelApiHandler; // ★★★ この行を追加
 import com.yuki920.bedwarsstats.config.ConfigHandler;
+import com.yuki920.bedwarsstats.hud.HudEditorScreen;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager; // ★★★ CommandManagerから変更
@@ -41,6 +42,15 @@ public class BwmCommand {
                         return 1;
                     })
                 )
+            )
+            // /bwm hud
+            .then(ClientCommandManager.literal("hud")
+                .executes(context -> {
+                    context.getSource().getClient().execute(() -> {
+                        context.getSource().getClient().setScreen(new HudEditorScreen());
+                    });
+                    return 1;
+                })
             )
         );
     }

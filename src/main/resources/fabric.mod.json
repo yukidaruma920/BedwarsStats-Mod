@@ -22,6 +22,9 @@
     		"com.yuki920.bedwarsstats.config.ModMenuIntegration"
   		]
 	},
+	"mixins": [
+		"bedwarsstats.client.mixins.json"
+	],
 	"depends": {
 		"fabricloader": ">=0.16.14",
 		"minecraft": "1.21.x",
