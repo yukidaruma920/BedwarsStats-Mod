@@ -8,20 +8,10 @@ import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
 @Config(name = "bedwarsstats")
 public class BedwarsStatsConfig implements ConfigData {
 
-    @ConfigEntry.Category("nametag")
-    @ConfigEntry.Gui.TransitiveObject
-    @Comment("Settings for the level display on nametags")
-    public NametagSettings nametag = new NametagSettings();
-
     @ConfigEntry.Category("who_hud")
     @ConfigEntry.Gui.TransitiveObject
     @Comment("Settings for the /who command HUD")
     public WhoHudSettings whoHud = new WhoHudSettings();
-
-    public static class NametagSettings {
-        @Comment("Enable/Disable the Bedwars level display on player nametags")
-        public boolean showNametagLevel = true;
-    }
 
     public static class WhoHudSettings {
         @Comment("Enable/Disable the HUD that shows stats from /who")

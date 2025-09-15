@@ -1,6 +1,5 @@
 package com.yuki920.bedwarsstats;
 
-import com.yuki920.bedwarsstats.cache.PlayerStarCache;
 import com.yuki920.bedwarsstats.config.ConfigHandler;
 import com.yuki920.bedwarsstats.hud.HudData;
 import com.google.gson.Gson;
@@ -33,18 +32,14 @@ public class HypixelApiHandler {
                     sendMessageToPlayer("§e" + username + " §ris nicked, stats cannot be retrieved.");
                     return;
                 }
-                String uuidStr = mojangJson.get("id").getAsString();
-                // Convert UUID string to UUID object
-                java.util.UUID uuid = java.util.UUID.fromString(uuidStr.replaceFirst(
-                    "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{12})", "$1-$2-$3-$4-$5"
-                ));
+                String uuid = mojangJson.get("id").getAsString();
 
                 String apiKey = ConfigHandler.getApiKey();
                 if (apiKey == null || apiKey.isEmpty()) {
                     sendMessageToPlayer("§cHypixel API Key not set!");
                     return;
                 }
-                String hypixelUrl = HYPIXEL_API_URL + uuidStr;
+                String hypixelUrl = HYPIXEL_API_URL + uuid;
                 String hypixelResponse = sendHttpRequest(hypixelUrl, apiKey);
                 if (hypixelResponse == null) return;
                 JsonObject hypixelJson = GSON.fromJson(hypixelResponse, JsonObject.class);
@@ -65,7 +60,7 @@ public class HypixelApiHandler {
                 }
                 JsonObject player = hypixelJson.getAsJsonObject("player");
 
-                String formattedMessage = formatStats(player, uuid);
+                String formattedMessage = formatStats(player);
                 if (formattedMessage != null) {
                     HudData.getInstance().addLine(formattedMessage);
                 }
@@ -105,7 +100,7 @@ public class HypixelApiHandler {
     }
 
     // ★★★ 2. formatStatsメソッドを新しい仕様に完全に更新 ★★★
-    private static String formatStats(JsonObject player, java.util.UUID uuid) {
+    private static String formatStats(JsonObject player) {
         String username = player.get("displayname").getAsString();
         String rankPrefix = getRankPrefix(player);
         
@@ -117,10 +112,6 @@ public class HypixelApiHandler {
         
         int stars = (player.has("achievements") && player.getAsJsonObject("achievements").has("bedwars_level"))
                 ? player.getAsJsonObject("achievements").get("bedwars_level").getAsInt() : 0;
-
-        // Add to cache
-        PlayerStarCache.addPlayer(uuid, stars);
-
         int wins = bedwars.has("wins_bedwars") ? bedwars.get("wins_bedwars").getAsInt() : 0;
         int losses = bedwars.has("losses_bedwars") ? bedwars.get("losses_bedwars").getAsInt() : 0;
         int finalKills = bedwars.has("final_kills_bedwars") ? bedwars.get("final_kills_bedwars").getAsInt() : 0;
