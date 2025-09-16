@@ -6,13 +6,17 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class HudEditorScreen extends Screen {
 
     private final BedwarsStatsConfig config;
     private boolean isDragging = false;
-    private boolean isResizing = false;
     private double dragStartX, dragStartY;
-    private final int resizeHandleSize = 5;
+
+    private int dummyWidth = 0;
+    private int dummyHeight = 0;
 
     public HudEditorScreen() {
         super(Text.literal("HUD Editor"));
@@ -20,65 +24,57 @@ public class HudEditorScreen extends Screen {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-        // In the editor, we can render a dummy HUD to show where it is.
-        int x = config.whoHud.hudX;
-        int y = config.whoHud.hudY;
-        int width = config.whoHud.hudWidth;
-        int height = config.whoHud.hudHeight;
+    protected void init() {
+        super.init();
+        // Calculate a dummy size for the preview based on some sample data
+        List<String> sampleLines = Arrays.asList("Player1 [100✫] FKDR: 2.0", "Player2 [200✫] FKDR: 3.0", "Player3 [300✫] FKDR: 4.0");
+        String title = "Bedwars Stats (/who)";
+        int padding = 5;
+        int titleMargin = 5;
 
-        // Draw a border to indicate the editable area
-        context.drawBorder(x - 1, y - 1, width + 2, height + 2, 0xFFFFFFFF);
-        context.fill(x, y, x + width, y + height, 0x80000000);
-        context.drawText(this.textRenderer, "Drag to move", x + 5, y + 5, 0xFFFFFF, false);
-        context.drawText(this.textRenderer, "Drag corner to resize", x + 5, y + 20, 0xFFFFFF, false);
-        context.drawText(this.textRenderer, "Close to save", x + 5, y + 35, 0xFFFFFF, false);
-
-        // Draw resize handle
-        context.fill(x + width - resizeHandleSize, y + height - resizeHandleSize, x + width, y + height, 0xFFFFFFFF);
+        int maxWidth = this.textRenderer.getWidth(title);
+        for (String line : sampleLines) {
+            maxWidth = Math.max(maxWidth, this.textRenderer.getWidth(line));
+        }
+        this.dummyWidth = maxWidth + (padding * 2);
+        this.dummyHeight = (this.textRenderer.fontHeight + 2) * (sampleLines.size() + 1) + (padding * 2) + titleMargin;
     }
 
-    private boolean isMouseOverResizeHandle(double mouseX, double mouseY) {
+    @Override
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        super.render(context, mouseX, mouseY, delta);
         int x = config.whoHud.hudX;
         int y = config.whoHud.hudY;
-        int width = config.whoHud.hudWidth;
-        int height = config.whoHud.hudHeight;
-        return mouseX >= x + width - resizeHandleSize && mouseX <= x + width &&
-               mouseY >= y + height - resizeHandleSize && mouseY <= y + height;
+        float scale = config.whoHud.hudScalePercent / 100.0f;
+
+        int finalWidth = (int) (this.dummyWidth * scale);
+        int finalHeight = (int) (this.dummyHeight * scale);
+
+        context.fill(x, y, x + finalWidth, y + finalHeight, 0x80444444);
+        context.drawBorder(x - 1, y - 1, finalWidth + 2, finalHeight + 2, 0xFFFFFFFF);
+        context.drawText(this.textRenderer, "Drag to move HUD", x + 5, y + 5, 0xFFFFFF, false);
+        context.drawText(this.textRenderer, "Close (Esc) to save", x + 5, y + 20, 0xFFFFFF, false);
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        float scale = config.whoHud.hudScalePercent / 100.0f;
+        int finalWidth = (int) (this.dummyWidth * scale);
+        int finalHeight = (int) (this.dummyHeight * scale);
         int x = config.whoHud.hudX;
         int y = config.whoHud.hudY;
-        int width = config.whoHud.hudWidth;
-        int height = config.whoHud.hudHeight;
 
-        if (button == 0) {
-            if (isMouseOverResizeHandle(mouseX, mouseY)) {
-                this.isResizing = true;
-                return true;
-            }
-            if (mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height) {
-                this.isDragging = true;
-                this.dragStartX = mouseX - x;
-                this.dragStartY = mouseY - y;
-                return true;
-            }
+        if (button == 0 && mouseX >= x && mouseX <= x + finalWidth && mouseY >= y && mouseY <= y + finalHeight) {
+            this.isDragging = true;
+            this.dragStartX = mouseX - x;
+            this.dragStartY = mouseY - y;
+            return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (this.isResizing) {
-            int newWidth = (int) (mouseX - config.whoHud.hudX);
-            int newHeight = (int) (mouseY - config.whoHud.hudY);
-            config.whoHud.hudWidth = Math.max(50, newWidth); // Set a minimum size
-            config.whoHud.hudHeight = Math.max(30, newHeight);
-            return true;
-        }
         if (this.isDragging) {
             config.whoHud.hudX = (int) (mouseX - this.dragStartX);
             config.whoHud.hudY = (int) (mouseY - this.dragStartY);
@@ -91,7 +87,6 @@ public class HudEditorScreen extends Screen {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (button == 0) {
             this.isDragging = false;
-            this.isResizing = false;
         }
         return super.mouseReleased(mouseX, mouseY, button);
     }
