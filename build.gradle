@@ -23,10 +23,6 @@ repositories {
 loom {
 	splitEnvironmentSourceSets()
 
-	mixin {
-		defaultRefmapName = "bedwarsstats-refmap.json"
-	}
-
 	mods {
 		"bedwarsstats" {
 			sourceSet sourceSets.main
