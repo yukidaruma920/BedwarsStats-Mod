@@ -27,10 +27,12 @@ public class BedwarsStatsConfig implements ConfigData {
         @ConfigEntry.BoundedDiscrete(min = 50, max = 300)
         public int hudScalePercent = 100;
 
-        @ConfigEntry.Gui.Excluded
+        @Comment("X position of the HUD")
+        @ConfigEntry.BoundedDiscrete(min = 0, max = 2000)
         public int hudX = 10;
 
-        @ConfigEntry.Gui.Excluded
+        @Comment("Y position of the HUD")
+        @ConfigEntry.BoundedDiscrete(min = 0, max = 2000)
         public int hudY = 10;
     }
 }
