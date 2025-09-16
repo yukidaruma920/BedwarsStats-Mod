@@ -27,28 +27,48 @@ public class WhoHud implements HudRenderCallback {
             return;
         }
 
+        // --- Auto-sizing logic ---
+        String title = "Bedwars Stats (/who)";
+        int padding = 5;
+        int titleMargin = 5;
+
+        // Calculate width
+        int maxWidth = textRenderer.getWidth(title);
+        for (String line : lines) {
+            maxWidth = Math.max(maxWidth, textRenderer.getWidth(line));
+        }
+        int contentWidth = maxWidth + (padding * 2);
+
+        // Calculate height
+        int contentHeight = (textRenderer.fontHeight + 2) * (lines.size() + 1) + (padding * 2) + titleMargin;
+
+        // --- End auto-sizing logic ---
+
         int x = config.whoHud.hudX;
         int y = config.whoHud.hudY;
-        int width = config.whoHud.hudWidth;
-        int height = config.whoHud.hudHeight;
+        float scale = config.whoHud.hudScalePercent / 100.0f;
+
+        int finalWidth = (int) (contentWidth * scale);
+        int finalHeight = (int) (contentHeight * scale);
 
         // Draw background
-        drawContext.fill(x, y, x + width, y + height, 0x80000000); // Semi-transparent black
+        drawContext.fill(x, y, x + finalWidth, y + finalHeight, 0x80000000); // Semi-transparent black
+
+        drawContext.getMatrices().push();
+        drawContext.getMatrices().translate(x, y, 0);
+        drawContext.getMatrices().scale(scale, scale, 1.0f);
 
         // Draw title
-        String title = "Bedwars Stats (/who)";
         int titleWidth = textRenderer.getWidth(title);
-        drawContext.drawText(textRenderer, title, x + (width - titleWidth) / 2, y + 5, 0xFFFFFF, true);
+        drawContext.drawText(textRenderer, title, (contentWidth - titleWidth) / 2, padding, 0xFFFFFF, true);
 
         // Draw stats
-        int lineY = y + 20;
+        int lineY = padding + textRenderer.fontHeight + titleMargin;
         for (String line : lines) {
-            if (lineY > y + height - 10) {
-                // Stop drawing if it overflows the HUD area
-                break;
-            }
-            drawContext.drawText(textRenderer, Text.literal(line), x + 5, lineY, 0xFFFFFF, false);
-            lineY += 10;
+            drawContext.drawText(textRenderer, Text.literal(line), padding, lineY, 0xFFFFFF, false);
+            lineY += (textRenderer.fontHeight + 2);
         }
+
+        drawContext.getMatrices().pop();
     }
 }
