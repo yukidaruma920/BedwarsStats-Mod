@@ -48,6 +48,7 @@ public class BwmCommand {
             // /bwm hud
             .then(ClientCommandManager.literal("hud")
                 .executes(context -> {
+                    context.getSource().sendFeedback(Text.literal("HUD command executed!"));
                     context.getSource().getClient().execute(() -> {
                         context.getSource().getClient().setScreen(new HudEditorScreen());
                     });

@@ -2,6 +2,7 @@ package com.yuki920.bedwarsstats;
 
 import com.yuki920.bedwarsstats.config.BedwarsStatsConfig;
 import com.yuki920.bedwarsstats.hud.HudData;
+import com.yuki920.bedwarsstats.stats.PlayerStats;
 import com.google.gson.Gson;
 import me.shedaniel.autoconfig.AutoConfig;
 import com.google.gson.JsonObject;
@@ -61,9 +62,9 @@ public class HypixelApiHandler {
                 }
                 JsonObject player = hypixelJson.getAsJsonObject("player");
 
-                String formattedMessage = formatStats(player);
-                if (formattedMessage != null) {
-                    HudData.getInstance().addLine(formattedMessage);
+                PlayerStats stats = formatStats(player);
+                if (stats != null) {
+                    HudData.getInstance().addPlayerStat(stats);
                 }
             } catch (Exception e) {
                 // BedwarsStatsModではなく、BedwarsStatsClientのLOGGERを使うようにする
@@ -100,17 +101,20 @@ public class HypixelApiHandler {
         return "§f"; // Green
     }
 
-    // ★★★ 2. formatStatsメソッドを新しい仕様に完全に更新 ★★★
-    private static String formatStats(JsonObject player) {
+    private static PlayerStats formatStats(JsonObject player) {
         String username = player.get("displayname").getAsString();
         String rankPrefix = getRankPrefix(player);
-        
+
         if (!player.has("stats") || player.get("stats").isJsonNull() || !player.getAsJsonObject("stats").has("Bedwars")) {
-             return rankPrefix + username + "§7: No Bedwars stats found.";
+            // Return a special stats object for players with no stats
+            return new PlayerStats(
+                "", rankPrefix, username,
+                "§7N/A", "", "§7N/A", "", "", ""
+            );
         }
-        
+
         JsonObject bedwars = player.getAsJsonObject("stats").getAsJsonObject("Bedwars");
-        
+
         int stars = (player.has("achievements") && player.getAsJsonObject("achievements").has("bedwars_level"))
                 ? player.getAsJsonObject("achievements").get("bedwars_level").getAsInt() : 0;
         int wins = bedwars.has("wins_bedwars") ? bedwars.get("wins_bedwars").getAsInt() : 0;
@@ -120,22 +124,22 @@ public class HypixelApiHandler {
 
         double wlr = (losses == 0) ? wins : (double) wins / losses;
         double fkdr = (finalDeaths == 0) ? finalKills : (double) finalKills / finalDeaths;
-        
-        String prestige = PrestigeFormatter.formatPrestige(stars);
 
-        // ★★★ 2. Statsごとの色付けを適用 ★★★
+        String prestige = PrestigeFormatter.formatPrestige(stars);
         String wlrColor = getWlrColor(wlr);
         String fkdrColor = getFkdrColor(fkdr);
 
-        // 新しい出力形式
-        return String.format("%s %s%s§r: §aWins §f%s §7| §aWLR %s%.2f§f §7| §aFinals §f%s §7| §aFKDR %s%.2f§f",
-                prestige, 
-                rankPrefix, 
-                username, 
-                formatNumber(wins), 
-                wlrColor, wlr, 
-                formatNumber(finalKills), 
-                fkdrColor, fkdr);
+        return new PlayerStats(
+            prestige,
+            rankPrefix,
+            username,
+            formatNumber(wins),
+            String.format("%.2f", wlr),
+            formatNumber(finalKills),
+            String.format("%.2f", fkdr),
+            wlrColor,
+            fkdrColor
+        );
     }
     
     // ★★★ 3. getRankPrefixメソッドを最新版に更新 ★★★
