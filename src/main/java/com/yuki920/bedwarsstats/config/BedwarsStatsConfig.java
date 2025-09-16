@@ -20,6 +20,9 @@ public class BedwarsStatsConfig implements ConfigData {
         @Comment("Enable/Disable the HUD that shows stats from /who")
         public boolean showWhoHud = true;
 
+        @Comment("Enable/Disable the shadow on the HUD text")
+        public boolean textShadow = true;
+
         @Comment("Change the overall size of the HUD (in percent)")
         @ConfigEntry.BoundedDiscrete(min = 50, max = 300)
         public int hudScalePercent = 100;

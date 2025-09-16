@@ -26,18 +26,41 @@ public class HudEditorScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        // Calculate a dummy size for the preview based on some sample data
-        List<String> sampleLines = Arrays.asList("Player1 [100✫] FKDR: 2.0", "Player2 [200✫] FKDR: 3.0", "Player3 [300✫] FKDR: 4.0");
-        String title = "Bedwars Stats (/who)";
-        int padding = 5;
-        int titleMargin = 5;
-
-        int maxWidth = this.textRenderer.getWidth(title);
-        for (String line : sampleLines) {
-            maxWidth = Math.max(maxWidth, this.textRenderer.getWidth(line));
+        // Calculate a dummy size for the preview based on a table layout
+        if (this.textRenderer == null) {
+            this.dummyWidth = 150;
+            this.dummyHeight = 100;
+            return;
         }
-        this.dummyWidth = maxWidth + (padding * 2);
-        this.dummyHeight = (this.textRenderer.fontHeight + 2) * (sampleLines.size() + 1) + (padding * 2) + titleMargin;
+
+        int padding = 5;
+        int columnSpacing = 10;
+        String[] headers = {"Player", "Wins", "WLR", "Finals", "FKDR"};
+        int[] colWidths = new int[headers.length];
+
+        // Sample data to estimate widths
+        String samplePlayer = "[100✫] [MVP++] yuki920";
+        String sampleWins = "1,234";
+        String sampleWlr = "12.34";
+        String sampleFinals = "5,678";
+        String sampleFkdr = "56.78";
+
+        colWidths[0] = Math.max(textRenderer.getWidth(headers[0]), textRenderer.getWidth(samplePlayer));
+        colWidths[1] = Math.max(textRenderer.getWidth(headers[1]), textRenderer.getWidth(sampleWins));
+        colWidths[2] = Math.max(textRenderer.getWidth(headers[2]), textRenderer.getWidth(sampleWlr));
+        colWidths[3] = Math.max(textRenderer.getWidth(headers[3]), textRenderer.getWidth(sampleFinals));
+        colWidths[4] = Math.max(textRenderer.getWidth(headers[4]), textRenderer.getWidth(sampleFkdr));
+
+        int contentWidth = (padding * 2);
+        for (int width : colWidths) {
+            contentWidth += width;
+        }
+        contentWidth += columnSpacing * (headers.length - 1);
+        // Estimate height for 3 rows + header
+        int contentHeight = (this.textRenderer.fontHeight + 2) * (3 + 1) + (padding * 2);
+
+        this.dummyWidth = contentWidth;
+        this.dummyHeight = contentHeight;
     }
 
     @Override
