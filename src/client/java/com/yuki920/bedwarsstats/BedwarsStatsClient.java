@@ -24,7 +24,7 @@ public class BedwarsStatsClient implements ClientModInitializer {
                 String playersPart = text.substring("ONLINE: ".length());
                 String[] playerNames = playersPart.split(", ");
                 for (String name : playerNames) {
-                    HypixelApiHandler.processPlayer(name.trim());
+                    HypixelApiHandler.processPlayer(name.trim(), true);
                 }
             }
         });

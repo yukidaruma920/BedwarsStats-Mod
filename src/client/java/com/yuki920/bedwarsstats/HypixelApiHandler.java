@@ -20,7 +20,7 @@ public class HypixelApiHandler {
     private static final Gson GSON = new Gson();
     private static final String HYPIXEL_API_URL = "https://api.hypixel.net/player?uuid=";
 
-    public static void processPlayer(String username) {
+    public static void processPlayer(String username, boolean outputToHud) {
         CompletableFuture.runAsync(() -> {
             try {
                 String mojangUrl = "https://api.mojang.com/users/profiles/minecraft/" + username;
@@ -64,7 +64,17 @@ public class HypixelApiHandler {
 
                 PlayerStats stats = formatStats(player);
                 if (stats != null) {
-                    HudData.getInstance().addPlayerStat(stats);
+                    if (outputToHud) {
+                        HudData.getInstance().addPlayerStat(stats);
+                    } else {
+                        // Recreate the formatted string for chat output
+                        String chatMessage = String.format("%s %s%s§r: §aWins §f%s §7| §aWLR %s%s§f §7| §aFinals §f%s §7| §aFKDR %s%s§f",
+                            stats.star(), stats.rank(), stats.username(),
+                            stats.wins(), stats.wlrColor(), stats.wlr(),
+                            stats.finals(), stats.fkdrColor(), stats.fkdr()
+                        );
+                        sendMessageToPlayer(chatMessage);
+                    }
                 }
             } catch (Exception e) {
                 // BedwarsStatsModではなく、BedwarsStatsClientのLOGGERを使うようにする
