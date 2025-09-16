@@ -1,9 +1,10 @@
 package com.yuki920.bedwarsstats.commands;
 
 import com.yuki920.bedwarsstats.HypixelApiHandler; // ★★★ この行を追加
-import com.yuki920.bedwarsstats.config.ConfigHandler;
+import com.yuki920.bedwarsstats.config.BedwarsStatsConfig;
 import com.yuki920.bedwarsstats.hud.HudEditorScreen;
 import com.mojang.brigadier.CommandDispatcher;
+import me.shedaniel.autoconfig.AutoConfig;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager; // ★★★ CommandManagerから変更
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource; // ★★★ ServerCommandSourceから変更
@@ -24,8 +25,9 @@ public class BwmCommand {
                 .then(ClientCommandManager.argument("key", StringArgumentType.greedyString())
                     .executes(context -> {
                         String apiKey = StringArgumentType.getString(context, "key");
-                        ConfigHandler.setApiKey(apiKey);
-                        ConfigHandler.saveConfig();
+                        BedwarsStatsConfig config = AutoConfig.getConfigHolder(BedwarsStatsConfig.class).getConfig();
+                        config.apiKey = apiKey;
+                        AutoConfig.getConfigHolder(BedwarsStatsConfig.class).save();
                         context.getSource().sendFeedback(Text.literal("§aAPI Key set successfully!"));
                         return 1;
                     })

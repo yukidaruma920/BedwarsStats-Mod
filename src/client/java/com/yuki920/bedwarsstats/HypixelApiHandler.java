@@ -1,8 +1,9 @@
 package com.yuki920.bedwarsstats;
 
-import com.yuki920.bedwarsstats.config.ConfigHandler;
+import com.yuki920.bedwarsstats.config.BedwarsStatsConfig;
 import com.yuki920.bedwarsstats.hud.HudData;
 import com.google.gson.Gson;
+import me.shedaniel.autoconfig.AutoConfig;
 import com.google.gson.JsonObject;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
@@ -34,7 +35,7 @@ public class HypixelApiHandler {
                 }
                 String uuid = mojangJson.get("id").getAsString();
 
-                String apiKey = ConfigHandler.getApiKey();
+                String apiKey = AutoConfig.getConfigHolder(BedwarsStatsConfig.class).getConfig().apiKey;
                 if (apiKey == null || apiKey.isEmpty()) {
                     sendMessageToPlayer("§cHypixel API Key not set!");
                     return;
