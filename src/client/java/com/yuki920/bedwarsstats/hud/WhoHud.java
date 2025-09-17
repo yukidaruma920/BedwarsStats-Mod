@@ -94,13 +94,13 @@ public class WhoHud implements HudRenderCallback {
             drawContext.drawText(textRenderer, Text.literal(stats.star() + " " + stats.rank() + stats.username()), currentX, currentY, 0xFFFFFF, textShadow);
             currentX += colWidths[0] + columnSpacing;
             // Wins Column (Right-aligned)
-            drawContext.drawText(textRenderer, Text.literal(stats.wins()), currentX + colWidths[1] - textRenderer.getWidth(stats.wins()), currentY, 0xFFFFFF, textShadow);
+            drawContext.drawText(textRenderer, Text.literal(stats.winsColor() + stats.wins()), currentX + colWidths[1] - textRenderer.getWidth(stats.wins()), currentY, 0xFFFFFF, textShadow);
             currentX += colWidths[1] + columnSpacing;
             // WLR Column (Right-aligned)
             drawContext.drawText(textRenderer, Text.literal(stats.wlrColor() + stats.wlr()), currentX + colWidths[2] - textRenderer.getWidth(stats.wlr()), currentY, 0xFFFFFF, textShadow);
             currentX += colWidths[2] + columnSpacing;
             // Finals Column (Right-aligned)
-            drawContext.drawText(textRenderer, Text.literal(stats.finals()), currentX + colWidths[3] - textRenderer.getWidth(stats.finals()), currentY, 0xFFFFFF, textShadow);
+            drawContext.drawText(textRenderer, Text.literal(stats.finalsColor() + stats.finals()), currentX + colWidths[3] - textRenderer.getWidth(stats.finals()), currentY, 0xFFFFFF, textShadow);
             currentX += colWidths[3] + columnSpacing;
             // FKDR Column (Right-aligned)
             drawContext.drawText(textRenderer, Text.literal(stats.fkdrColor() + stats.fkdr()), currentX + colWidths[4] - textRenderer.getWidth(stats.fkdr()), currentY, 0xFFFFFF, textShadow);

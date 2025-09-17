@@ -111,6 +111,32 @@ public class HypixelApiHandler {
         return "§f"; // Green
     }
 
+    private static String getWinsColor(int wins) {
+        if (wins >= 50000) return "§5"; // Dark Purple
+        if (wins >= 25000) return "§d"; // Light Purple
+        if (wins >= 10000) return "§4"; // Dark Red
+        if (wins >= 5000) return "§c"; // Red
+        if (wins >= 2500) return "§6"; // Gold
+        if (wins >= 1000) return "§e"; // Yellow
+        if (wins >= 500) return "§2";  // Dark Green
+        if (wins >= 250) return "§a";  // Green
+        if (wins >= 50) return "§f";  // White
+        return "§8"; // Gray
+    }
+
+    private static String getFinalsColor(int finals) {
+        if (finals >= 100000) return "§5"; // Dark Purple
+        if (finals >= 50000) return "§d"; // Light Purple
+        if (finals >= 25000) return "§4"; // Dark Red
+        if (finals >= 10000) return "§c"; // Red
+        if (finals >= 5000) return "§6"; // Gold
+        if (finals >= 2500) return "§e"; // Yellow
+        if (finals >= 1000) return "§2";  // Dark Green
+        if (finals >= 500) return "§a";  // Green
+        if (finals >= 100) return "§f";  // White
+        return "§8"; // Gray
+    }
+
     private static PlayerStats formatStats(JsonObject player) {
         String username = player.get("displayname").getAsString();
         String rankPrefix = getRankPrefix(player);
@@ -119,7 +145,8 @@ public class HypixelApiHandler {
             // Return a special stats object for players with no stats
             return new PlayerStats(
                 "", rankPrefix, username,
-                "§7N/A", "", "§7N/A", "", "", ""
+                "§7N/A", "§7N/A", "§7N/A", "§7N/A",
+                "§7", "§7", "§7", "§7"
             );
         }
 
@@ -136,7 +163,9 @@ public class HypixelApiHandler {
         double fkdr = (finalDeaths == 0) ? finalKills : (double) finalKills / finalDeaths;
 
         String prestige = PrestigeFormatter.formatPrestige(stars);
+        String winsColor = getWinsColor(wins);
         String wlrColor = getWlrColor(wlr);
+        String finalsColor = getFinalsColor(finalKills);
         String fkdrColor = getFkdrColor(fkdr);
 
         return new PlayerStats(
@@ -147,7 +176,9 @@ public class HypixelApiHandler {
             String.format("%.2f", wlr),
             formatNumber(finalKills),
             String.format("%.2f", fkdr),
+            winsColor,
             wlrColor,
+            finalsColor,
             fkdrColor
         );
     }
