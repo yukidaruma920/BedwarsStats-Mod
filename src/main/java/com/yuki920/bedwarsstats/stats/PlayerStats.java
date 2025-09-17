@@ -8,6 +8,8 @@ public record PlayerStats(
     String wlr,
     String finals,
     String fkdr,
+    String winsColor,
     String wlrColor,
+    String finalsColor,
     String fkdrColor
 ) {}
