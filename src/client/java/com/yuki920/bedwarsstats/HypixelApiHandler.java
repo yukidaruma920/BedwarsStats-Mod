@@ -76,24 +76,31 @@ public class HypixelApiHandler {
 
     // ★★★ 2. Statsごとの色付け用ヘルパーメソッド ★★★
     private static String getFkdrColor(double fkdr) {
+        if (fkdr >= 20) return "§5"; // Dark Purple
+        if (fkdr >= 15) return "§d"; // Light Purple
         if (fkdr >= 10) return "§4"; // Dark Red
-        if (fkdr >= 8) return "§c"; // Red
-        if (fkdr >= 6) return "§6"; // Gold
-        if (fkdr >= 4) return "§e"; // Yellow
-        if (fkdr >= 2) return "§2";  // Dark Green
-        if (fkdr >= 1) return "§a";  // Green
-        return "§f"; // Green
+        if (fkdr >= 8)  return "§c"; // Red
+        if (fkdr >= 6)  return "§6"; // Gold
+        if (fkdr >= 4)  return "§e"; // Yellow
+        if (fkdr >= 2)  return "§2"; // Dark Green
+        if (fkdr >= 1)  return "§a"; // Green
+        if (fkdr >= 0.5) return "§f"; // White
+        return "§7"; // Light Gray（0未満〜0.49）
     }
-    
+
     private static String getWlrColor(double wlr) {
-        if (wlr >= 5) return "§4"; // Dark Red
-        if (wlr >= 4) return "§c"; // Red
-        if (wlr >= 3) return "§6"; // Gold
-        if (wlr >= 2) return "§e"; // Yellow
-        if (wlr >= 1) return "§2";  // Dark Green
-        if (wlr >= 0.5) return "§a";  // Green
-        return "§f"; // Green
+        if (wlr >= 10) return "§5"; // Dark Purple
+        if (wlr >= 8)  return "§d"; // Light Purple
+        if (wlr >= 6)  return "§4"; // Dark Red
+        if (wlr >= 5)  return "§c"; // Red
+        if (wlr >= 4)  return "§6"; // Gold
+        if (wlr >= 3)  return "§e"; // Yellow
+        if (wlr >= 2)  return "§2"; // Dark Green
+        if (wlr >= 1)  return "§a"; // Green
+        if (wlr >= 0.5) return "§f"; // White
+        return "§7"; // Light Gray（0未満〜0.49）
     }
+
 
     private static String getWinsColor(int wins) {
         if (wins >= 50000) return "§5"; // Dark Purple
@@ -105,7 +112,7 @@ public class HypixelApiHandler {
         if (wins >= 500) return "§2";  // Dark Green
         if (wins >= 250) return "§a";  // Green
         if (wins >= 50) return "§f";  // White
-        return "§8"; // Gray
+        return "§7"; // Gray
     }
 
     private static String getFinalsColor(int finals) {
@@ -118,7 +125,7 @@ public class HypixelApiHandler {
         if (finals >= 1000) return "§2";  // Dark Green
         if (finals >= 500) return "§a";  // Green
         if (finals >= 100) return "§f";  // White
-        return "§8"; // Gray
+        return "§7"; // Gray
     }
 
     private static String formatStats(JsonObject player) {
