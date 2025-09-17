@@ -16,7 +16,7 @@ public class BwmCommand {
         dispatcher.register(ClientCommandManager.literal("bwm")
             // /bwm (引数なし)
             .executes(context -> {
-                context.getSource().sendFeedback(Text.literal("§cUsage: /bwm <setapikey|stats>. HUD settings can be changed in ModMenu."));
+                context.getSource().sendFeedback(Text.literal("§cUsage: /bwm <setapikey|stats>"));
                 return 1;
             })
             // /bwm setapikey <key>
@@ -38,8 +38,7 @@ public class BwmCommand {
                 .then(ClientCommandManager.argument("username", StringArgumentType.string())
                     .executes(context -> {
                         String username = StringArgumentType.getString(context, "username");
-                        // HypixelApiHandlerを直接呼び出す (チャット出力)
-                        HypixelApiHandler.processPlayer(username, false);
+                        HypixelApiHandler.processPlayer(username);
                         return 1;
                     })
                 )

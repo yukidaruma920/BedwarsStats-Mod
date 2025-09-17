@@ -11,28 +11,4 @@ public class BedwarsStatsConfig implements ConfigData {
     @Comment("Your Hypixel API key. Get one by running /api new in-game.")
     public String apiKey = "";
 
-    @ConfigEntry.Category("who_hud")
-    @ConfigEntry.Gui.TransitiveObject
-    @Comment("Settings for the /who command HUD")
-    public WhoHudSettings whoHud = new WhoHudSettings();
-
-    public static class WhoHudSettings {
-        @Comment("Enable/Disable the HUD that shows stats from /who")
-        public boolean showWhoHud = true;
-
-        @Comment("Enable/Disable the shadow on the HUD text")
-        public boolean textShadow = true;
-
-        @Comment("Change the overall size of the HUD (in percent)")
-        @ConfigEntry.BoundedDiscrete(min = 50, max = 300)
-        public int hudScalePercent = 100;
-
-        @Comment("X position of the HUD")
-        @ConfigEntry.BoundedDiscrete(min = 0, max = 2000)
-        public int hudX = 10;
-
-        @Comment("Y position of the HUD")
-        @ConfigEntry.BoundedDiscrete(min = 0, max = 2000)
-        public int hudY = 10;
-    }
 }

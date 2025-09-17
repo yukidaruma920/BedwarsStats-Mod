@@ -1,8 +1,6 @@
 package com.yuki920.bedwarsstats;
 
 import com.yuki920.bedwarsstats.config.BedwarsStatsConfig;
-import com.yuki920.bedwarsstats.hud.HudData;
-import com.yuki920.bedwarsstats.stats.PlayerStats;
 import com.google.gson.Gson;
 import me.shedaniel.autoconfig.AutoConfig;
 import com.google.gson.JsonObject;
@@ -20,7 +18,7 @@ public class HypixelApiHandler {
     private static final Gson GSON = new Gson();
     private static final String HYPIXEL_API_URL = "https://api.hypixel.net/player?uuid=";
 
-    public static void processPlayer(String username, boolean outputToHud) {
+    public static void processPlayer(String username) {
         CompletableFuture.runAsync(() -> {
             try {
                 String mojangUrl = "https://api.mojang.com/users/profiles/minecraft/" + username;
@@ -46,13 +44,12 @@ public class HypixelApiHandler {
                 if (hypixelResponse == null) return;
                 JsonObject hypixelJson = GSON.fromJson(hypixelResponse, JsonObject.class);
 
-                // ★★★ 4. 無効なAPIキーの警告 (メッセージ修正版) ★★★
                 if (hypixelJson != null && !hypixelJson.get("success").getAsBoolean()) {
                     if (hypixelJson.has("cause") && hypixelJson.get("cause").getAsString().equals("Invalid API key")) {
                         sendMessageToPlayer("§cYour Hypixel API key is invalid!");
                         sendMessageToPlayer("§ePlease get a new one from the Hypixel Developer Dashboard:");
                         sendMessageToPlayer("§bhttps://developer.hypixel.net/");
-                        return; // 処理を中断
+                        return;
                     }
                 }
                 
@@ -62,24 +59,11 @@ public class HypixelApiHandler {
                 }
                 JsonObject player = hypixelJson.getAsJsonObject("player");
 
-                PlayerStats stats = formatStats(player);
-                if (stats != null) {
-                    if (outputToHud) {
-                        HudData.getInstance().addPlayerStat(stats);
-                    } else {
-                        // Recreate the formatted string for chat output
-                        String chatMessage = String.format("%s %s%s§r: §aWins §f%s §7| §aWLR %s%s§f §7| §aFinals §f%s §7| §aFKDR %s%s§f",
-                            stats.star(), stats.rank(), stats.username(),
-                            stats.wins(), stats.wlrColor(), stats.wlr(),
-                            stats.finals(), stats.fkdrColor(), stats.fkdr()
-                        );
-                        sendMessageToPlayer(chatMessage);
-                    }
+                String chatMessage = formatStats(player);
+                if (chatMessage != null) {
+                    sendMessageToPlayer(chatMessage);
                 }
             } catch (Exception e) {
-                // BedwarsStatsModではなく、BedwarsStatsClientのLOGGERを使うようにする
-                // BedwarsStatsClient.LOGGER.error("Error processing player " + username, e);
-                // もしくはシンプルにコンソールに出力
                  e.printStackTrace();
             }
         });
@@ -137,17 +121,12 @@ public class HypixelApiHandler {
         return "§8"; // Gray
     }
 
-    private static PlayerStats formatStats(JsonObject player) {
+    private static String formatStats(JsonObject player) {
         String username = player.get("displayname").getAsString();
         String rankPrefix = getRankPrefix(player);
 
         if (!player.has("stats") || player.get("stats").isJsonNull() || !player.getAsJsonObject("stats").has("Bedwars")) {
-            // Return a special stats object for players with no stats
-            return new PlayerStats(
-                "", rankPrefix, username,
-                "§7N/A", "§7N/A", "§7N/A", "§7N/A",
-                "§7", "§7", "§7", "§7"
-            );
+            return rankPrefix + username + "§7: No Bedwars stats found.";
         }
 
         JsonObject bedwars = player.getAsJsonObject("stats").getAsJsonObject("Bedwars");
@@ -168,19 +147,14 @@ public class HypixelApiHandler {
         String finalsColor = getFinalsColor(finalKills);
         String fkdrColor = getFkdrColor(fkdr);
 
-        return new PlayerStats(
-            prestige,
-            rankPrefix,
-            username,
-            formatNumber(wins),
-            String.format("%.2f", wlr),
-            formatNumber(finalKills),
-            String.format("%.2f", fkdr),
-            winsColor,
-            wlrColor,
-            finalsColor,
-            fkdrColor
-        );
+        return String.format("%s %s%s§r: Wins %s%s§r | WLR %s%.2f§r | Finals %s%s§r | FKDR %s%.2f",
+                prestige,
+                rankPrefix,
+                username,
+                winsColor, formatNumber(wins),
+                wlrColor, wlr,
+                finalsColor, formatNumber(finalKills),
+                fkdrColor, fkdr);
     }
     
     // ★★★ 3. getRankPrefixメソッドを最新版に更新 ★★★
