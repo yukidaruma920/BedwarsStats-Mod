@@ -21,52 +21,73 @@ public class HypixelApiHandler {
     public static void processPlayer(String username) {
         CompletableFuture.runAsync(() -> {
             try {
-                String mojangUrl = "https://api.mojang.com/users/profiles/minecraft/" + username;
-                String mojangResponse = sendHttpRequest(mojangUrl, null);
-                if (mojangResponse == null) {
-                    sendMessageToPlayer("§e" + username + " §ris nicked, stats cannot be retrieved.");
-                    return;
-                }
-                JsonObject mojangJson = GSON.fromJson(mojangResponse, JsonObject.class);
-                if (mojangJson == null || !mojangJson.has("id")) {
-                    sendMessageToPlayer("§e" + username + " §ris nicked, stats cannot be retrieved.");
-                    return;
-                }
-                String uuid = mojangJson.get("id").getAsString();
+                BedwarsStatsConfig config = AutoConfig.getConfigHolder(BedwarsStatsConfig.class).getConfig();
+                String myNick = config.myNick;
 
-                String apiKey = AutoConfig.getConfigHolder(BedwarsStatsConfig.class).getConfig().apiKey;
-                if (apiKey == null || apiKey.isEmpty()) {
-                    sendMessageToPlayer("§cHypixel API Key not set!");
-                    return;
-                }
-                String hypixelUrl = HYPIXEL_API_URL + uuid;
-                String hypixelResponse = sendHttpRequest(hypixelUrl, apiKey);
-                if (hypixelResponse == null) return;
-                JsonObject hypixelJson = GSON.fromJson(hypixelResponse, JsonObject.class);
-
-                if (hypixelJson != null && !hypixelJson.get("success").getAsBoolean()) {
-                    if (hypixelJson.has("cause") && hypixelJson.get("cause").getAsString().equals("Invalid API key")) {
-                        sendMessageToPlayer("§cYour Hypixel API key is invalid!");
-                        sendMessageToPlayer("§ePlease get a new one from the Hypixel Developer Dashboard:");
-                        sendMessageToPlayer("§bhttps://developer.hypixel.net/");
+                if (myNick != null && !myNick.isEmpty() && myNick.equalsIgnoreCase(username)) {
+                    // This is the player's own nick, get UUID from the client
+                    MinecraftClient client = MinecraftClient.getInstance();
+                    if (client.player != null) {
+                        String uuid = client.player.getUuid().toString();
+                        fetchAndDisplayStats(uuid, username);
+                    }
+                } else {
+                    // Look up player via Mojang API
+                    String mojangUrl = "https://api.mojang.com/users/profiles/minecraft/" + username;
+                    String mojangResponse = sendHttpRequest(mojangUrl, null);
+                    if (mojangResponse == null) {
+                        sendMessageToPlayer("§e" + username + " §ris nicked, stats cannot be retrieved.");
                         return;
                     }
-                }
-                
-                if (hypixelJson == null || !hypixelJson.has("player") || hypixelJson.get("player").isJsonNull()) {
-                    sendMessageToPlayer("§e" + username + " §ris nicked, stats cannot be retrieved.");
-                    return;
-                }
-                JsonObject player = hypixelJson.getAsJsonObject("player");
-
-                String chatMessage = formatStats(player);
-                if (chatMessage != null) {
-                    sendMessageToPlayer(chatMessage);
+                    JsonObject mojangJson = GSON.fromJson(mojangResponse, JsonObject.class);
+                    if (mojangJson == null || !mojangJson.has("id")) {
+                        sendMessageToPlayer("§e" + username + " §ris nicked, stats cannot be retrieved.");
+                        return;
+                    }
+                    String uuid = mojangJson.get("id").getAsString();
+                    fetchAndDisplayStats(uuid, username);
                 }
             } catch (Exception e) {
-                 e.printStackTrace();
+                e.printStackTrace();
             }
         });
+    }
+
+    private static void fetchAndDisplayStats(String uuid, String displayUsername) throws Exception {
+        String apiKey = AutoConfig.getConfigHolder(BedwarsStatsConfig.class).getConfig().apiKey;
+        if (apiKey == null || apiKey.isEmpty()) {
+            sendMessageToPlayer("§cHypixel API Key not set!");
+            return;
+        }
+        String hypixelUrl = HYPIXEL_API_URL + uuid;
+        String hypixelResponse = sendHttpRequest(hypixelUrl, apiKey);
+        if (hypixelResponse == null) return;
+        JsonObject hypixelJson = GSON.fromJson(hypixelResponse, JsonObject.class);
+
+        if (hypixelJson != null && !hypixelJson.get("success").getAsBoolean()) {
+            if (hypixelJson.has("cause") && hypixelJson.get("cause").getAsString().equals("Invalid API key")) {
+                sendMessageToPlayer("§cYour Hypixel API key is invalid!");
+                sendMessageToPlayer("§ePlease get a new one from the Hypixel Developer Dashboard:");
+                sendMessageToPlayer("§bhttps://developer.hypixel.net/");
+                return;
+            }
+        }
+
+        if (hypixelJson == null || !hypixelJson.has("player") || hypixelJson.get("player").isJsonNull()) {
+            sendMessageToPlayer("§e" + displayUsername + " §ris nicked, stats cannot be retrieved.");
+            return;
+        }
+        JsonObject player = hypixelJson.getAsJsonObject("player");
+
+        // If we looked up our own nick, override the display name with the nick
+        if (!player.get("displayname").getAsString().equalsIgnoreCase(displayUsername)) {
+            player.addProperty("displayname", displayUsername);
+        }
+
+        String chatMessage = formatStats(player);
+        if (chatMessage != null) {
+            sendMessageToPlayer(chatMessage);
+        }
     }
 
     // ★★★ 1. 数値をフォーマットするヘルパーメソッドを追加 ★★★
@@ -128,7 +149,18 @@ public class HypixelApiHandler {
         return "§7"; // Gray
     }
 
+    private static int getInt(JsonObject obj, String memberName) {
+        if (obj.has(memberName)) {
+            return obj.get(memberName).getAsInt();
+        }
+        return 0;
+    }
+
     private static String formatStats(JsonObject player) {
+        BedwarsStatsConfig config = AutoConfig.getConfigHolder(BedwarsStatsConfig.class).getConfig();
+        BedwarsStatsConfig.BedwarsMode mode = config.bedwarsMode;
+        String prefix = mode.getApiPrefix();
+
         String username = player.get("displayname").getAsString();
         String rankPrefix = getRankPrefix(player);
 
@@ -140,10 +172,10 @@ public class HypixelApiHandler {
 
         int stars = (player.has("achievements") && player.getAsJsonObject("achievements").has("bedwars_level"))
                 ? player.getAsJsonObject("achievements").get("bedwars_level").getAsInt() : 0;
-        int wins = bedwars.has("wins_bedwars") ? bedwars.get("wins_bedwars").getAsInt() : 0;
-        int losses = bedwars.has("losses_bedwars") ? bedwars.get("losses_bedwars").getAsInt() : 0;
-        int finalKills = bedwars.has("final_kills_bedwars") ? bedwars.get("final_kills_bedwars").getAsInt() : 0;
-        int finalDeaths = bedwars.has("final_deaths_bedwars") ? bedwars.get("final_deaths_bedwars").getAsInt() : 0;
+        int wins = getInt(bedwars, prefix + "wins_bedwars");
+        int losses = getInt(bedwars, prefix + "losses_bedwars");
+        int finalKills = getInt(bedwars, prefix + "final_kills_bedwars");
+        int finalDeaths = getInt(bedwars, prefix + "final_deaths_bedwars");
 
         double wlr = (losses == 0) ? wins : (double) wins / losses;
         double fkdr = (finalDeaths == 0) ? finalKills : (double) finalKills / finalDeaths;
@@ -154,10 +186,11 @@ public class HypixelApiHandler {
         String finalsColor = getFinalsColor(finalKills);
         String fkdrColor = getFkdrColor(fkdr);
 
-        return String.format("%s %s%s§r: Wins %s%s§r | WLR %s%.2f§r | Finals %s%s§r | FKDR %s%.2f",
+        return String.format("%s %s%s§r §7[%s]§r: Wins %s%s§r | WLR %s%.2f§r | Finals %s%s§r | FKDR %s%.2f",
                 prestige,
                 rankPrefix,
                 username,
+                mode.getDisplayName(),
                 winsColor, formatNumber(wins),
                 wlrColor, wlr,
                 finalsColor, formatNumber(finalKills),
