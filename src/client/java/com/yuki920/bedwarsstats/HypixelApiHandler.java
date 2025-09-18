@@ -17,6 +17,31 @@ import java.util.concurrent.CompletableFuture;
 public class HypixelApiHandler {
     private static final Gson GSON = new Gson();
     private static final String HYPIXEL_API_URL = "https://api.hypixel.net/player?uuid=";
+    private static final String HYPIXEL_KEY_API_URL = "https://api.hypixel.net/key";
+
+    public static void checkApiKeyValidity() {
+        CompletableFuture.runAsync(() -> {
+            try {
+                BedwarsStatsConfig config = AutoConfig.getConfigHolder(BedwarsStatsConfig.class).getConfig();
+                String apiKey = config.apiKey;
+
+                if (apiKey == null || apiKey.isEmpty()) {
+                    return; // No key set, so nothing to check.
+                }
+
+                String response = sendHttpRequest(HYPIXEL_KEY_API_URL, apiKey);
+                if (response == null) return; // Request failed, but don't spam chat.
+
+                JsonObject json = GSON.fromJson(response, JsonObject.class);
+                if (json != null && !json.get("success").getAsBoolean()) {
+                    sendMessageToPlayer("§c[BedwarsStats] Your Hypixel API key appears to be invalid or expired!");
+                    sendMessageToPlayer("§eRun §a/bwm settings setapikey <key> §eto set a new one.");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
 
     public static void processPlayer(String username) {
         CompletableFuture.runAsync(() -> {
