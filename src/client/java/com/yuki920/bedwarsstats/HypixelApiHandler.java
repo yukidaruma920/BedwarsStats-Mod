@@ -44,6 +44,12 @@ public class HypixelApiHandler {
     }
 
     public static void processPlayer(String username) {
+        // Get the mode from the config for default processing
+        BedwarsStatsConfig config = AutoConfig.getConfigHolder(BedwarsStatsConfig.class).getConfig();
+        processPlayer(username, config.bedwarsMode);
+    }
+
+    public static void processPlayer(String username, BedwarsStatsConfig.BedwarsMode mode) {
         CompletableFuture.runAsync(() -> {
             try {
                 BedwarsStatsConfig config = AutoConfig.getConfigHolder(BedwarsStatsConfig.class).getConfig();
@@ -54,7 +60,7 @@ public class HypixelApiHandler {
                     MinecraftClient client = MinecraftClient.getInstance();
                     if (client.player != null) {
                         String uuid = client.player.getUuid().toString();
-                        fetchAndDisplayStats(uuid, username);
+                        fetchAndDisplayStats(uuid, username, mode);
                     }
                 } else {
                     // Look up player via Mojang API
@@ -70,7 +76,7 @@ public class HypixelApiHandler {
                         return;
                     }
                     String uuid = mojangJson.get("id").getAsString();
-                    fetchAndDisplayStats(uuid, username);
+                    fetchAndDisplayStats(uuid, username, mode);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -78,7 +84,7 @@ public class HypixelApiHandler {
         });
     }
 
-    private static void fetchAndDisplayStats(String uuid, String displayUsername) throws Exception {
+    private static void fetchAndDisplayStats(String uuid, String displayUsername, BedwarsStatsConfig.BedwarsMode mode) throws Exception {
         String apiKey = AutoConfig.getConfigHolder(BedwarsStatsConfig.class).getConfig().apiKey;
         if (apiKey == null || apiKey.isEmpty()) {
             sendMessageToPlayer("§cHypixel API Key not set!");
@@ -109,7 +115,7 @@ public class HypixelApiHandler {
             player.addProperty("displayname", displayUsername);
         }
 
-        String chatMessage = formatStats(player);
+        String chatMessage = formatStats(player, mode);
         if (chatMessage != null) {
             sendMessageToPlayer(chatMessage);
         }
@@ -181,9 +187,7 @@ public class HypixelApiHandler {
         return 0;
     }
 
-    private static String formatStats(JsonObject player) {
-        BedwarsStatsConfig config = AutoConfig.getConfigHolder(BedwarsStatsConfig.class).getConfig();
-        BedwarsStatsConfig.BedwarsMode mode = config.bedwarsMode;
+    private static String formatStats(JsonObject player, BedwarsStatsConfig.BedwarsMode mode) {
         String prefix = mode.getApiPrefix();
 
         String username = player.get("displayname").getAsString();

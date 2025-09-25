@@ -22,7 +22,7 @@ public class BedwarsStatsConfig implements ConfigData {
         OVERALL("Overall", ""),
         SOLO("Solo", "eight_one_"),
         DOUBLES("Doubles", "eight_two_"),
-        TRIPLES("Triples", "four_three_"),
+        THREES("Threes", "four_three_"),
         FOURS("Fours", "four_four_");
 
         private final String displayName;
