@@ -9,12 +9,10 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.suggestion.SuggestionProviders;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
 
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 public class BwmCommand {
 
@@ -24,6 +22,10 @@ public class BwmCommand {
                     builder
             );
 
+    private static final SuggestionProvider<FabricClientCommandSource> ONLINE_PLAYER_SUGGESTIONS = (context, builder) ->
+            CommandSource.suggestMatching(context.getSource().getPlayerNames(), builder);
+
+
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         dispatcher.register(ClientCommandManager.literal("bwm")
             .executes(context -> {
@@ -32,7 +34,7 @@ public class BwmCommand {
             })
             .then(ClientCommandManager.literal("stats")
                 .then(ClientCommandManager.argument("username", StringArgumentType.string())
-                    .suggests(SuggestionProviders.ASK_SERVER) // Suggest online players
+                    .suggests(ONLINE_PLAYER_SUGGESTIONS) // Suggest online players
                     .executes(context -> {
                         String username = StringArgumentType.getString(context, "username");
                         // No mode specified, use the one from config
