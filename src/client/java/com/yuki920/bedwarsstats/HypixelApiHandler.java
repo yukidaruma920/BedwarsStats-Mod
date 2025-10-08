@@ -35,7 +35,7 @@ public class HypixelApiHandler {
                 JsonObject json = GSON.fromJson(response, JsonObject.class);
                 if (json != null && !json.get("success").getAsBoolean()) {
                     sendMessageToPlayer("§c[BedwarsStats] Your Hypixel API key appears to be invalid or expired!");
-                    sendMessageToPlayer("§eRun §a/bwm settings setapikey <key> §eto set a new one.");
+                    sendMessageToPlayer("§eRun §a/bwm settings apikey <key> §eto set a new one.");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -44,7 +44,6 @@ public class HypixelApiHandler {
     }
 
     public static void processPlayer(String username) {
-        // Get the mode from the config for default processing
         BedwarsStatsConfig config = AutoConfig.getConfigHolder(BedwarsStatsConfig.class).getConfig();
         processPlayer(username, config.bedwarsMode);
     }
@@ -56,14 +55,12 @@ public class HypixelApiHandler {
                 String myNick = config.myNick;
 
                 if (myNick != null && !myNick.isEmpty() && myNick.equalsIgnoreCase(username)) {
-                    // This is the player's own nick, get UUID from the client
                     MinecraftClient client = MinecraftClient.getInstance();
                     if (client.player != null) {
                         String uuid = client.player.getUuid().toString();
                         fetchAndDisplayStats(uuid, username, mode);
                     }
                 } else {
-                    // Look up player via Mojang API
                     String mojangUrl = "https://api.mojang.com/users/profiles/minecraft/" + username;
                     String mojangResponse = sendHttpRequest(mojangUrl, null);
                     if (mojangResponse == null) {
@@ -85,7 +82,8 @@ public class HypixelApiHandler {
     }
 
     private static void fetchAndDisplayStats(String uuid, String displayUsername, BedwarsStatsConfig.BedwarsMode mode) throws Exception {
-        String apiKey = AutoConfig.getConfigHolder(BedwarsStatsConfig.class).getConfig().apiKey;
+        BedwarsStatsConfig config = AutoConfig.getConfigHolder(BedwarsStatsConfig.class).getConfig();
+        String apiKey = config.apiKey;
         if (apiKey == null || apiKey.isEmpty()) {
             sendMessageToPlayer("§cHypixel API Key not set!");
             return;
@@ -110,7 +108,6 @@ public class HypixelApiHandler {
         }
         JsonObject player = hypixelJson.getAsJsonObject("player");
 
-        // If we looked up our own nick, override the display name with the nick
         if (!player.get("displayname").getAsString().equalsIgnoreCase(displayUsername)) {
             player.addProperty("displayname", displayUsername);
         }
@@ -121,90 +118,92 @@ public class HypixelApiHandler {
         }
     }
 
-    // ★★★ 1. 数値をフォーマットするヘルパーメソッドを追加 ★★★
     private static String formatNumber(int number) {
         return String.format("%,d", number);
     }
 
-    // ★★★ 2. Statsごとの色付け用ヘルパーメソッド ★★★
     private static String getFkdrColor(double fkdr) {
-        if (fkdr >= 20) return "§5"; // Dark Purple
-        if (fkdr >= 15) return "§d"; // Light Purple
-        if (fkdr >= 10) return "§4"; // Dark Red
-        if (fkdr >= 8)  return "§c"; // Red
-        if (fkdr >= 6)  return "§6"; // Gold
-        if (fkdr >= 4)  return "§e"; // Yellow
-        if (fkdr >= 2)  return "§2"; // Dark Green
-        if (fkdr >= 1)  return "§a"; // Green
-        if (fkdr >= 0.5) return "§f"; // White
-        return "§7"; // Light Gray（0未満〜0.49）
+        if (fkdr >= 20) return "§5";
+        if (fkdr >= 15) return "§d";
+        if (fkdr >= 10) return "§4";
+        if (fkdr >= 8)  return "§c";
+        if (fkdr >= 6)  return "§6";
+        if (fkdr >= 4)  return "§e";
+        if (fkdr >= 2)  return "§2";
+        if (fkdr >= 1)  return "§a";
+        if (fkdr >= 0.5) return "§f";
+        return "§7";
     }
 
     private static String getWlrColor(double wlr) {
-        if (wlr >= 10) return "§5"; // Dark Purple
-        if (wlr >= 8)  return "§d"; // Light Purple
-        if (wlr >= 6)  return "§4"; // Dark Red
-        if (wlr >= 5)  return "§c"; // Red
-        if (wlr >= 4)  return "§6"; // Gold
-        if (wlr >= 3)  return "§e"; // Yellow
-        if (wlr >= 2)  return "§2"; // Dark Green
-        if (wlr >= 1)  return "§a"; // Green
-        if (wlr >= 0.5) return "§f"; // White
-        return "§7"; // Light Gray（0未満〜0.49）
+        if (wlr >= 10) return "§5";
+        if (wlr >= 8)  return "§d";
+        if (wlr >= 6)  return "§4";
+        if (wlr >= 5)  return "§c";
+        if (wlr >= 4)  return "§6";
+        if (wlr >= 3)  return "§e";
+        if (wlr >= 2)  return "§2";
+        if (wlr >= 1)  return "§a";
+        if (wlr >= 0.5) return "§f";
+        return "§7";
     }
 
-
     private static String getWinsColor(int wins) {
-        if (wins >= 50000) return "§5"; // Dark Purple
-        if (wins >= 25000) return "§d"; // Light Purple
-        if (wins >= 10000) return "§4"; // Dark Red
-        if (wins >= 5000) return "§c"; // Red
-        if (wins >= 2500) return "§6"; // Gold
-        if (wins >= 1000) return "§e"; // Yellow
-        if (wins >= 500) return "§2";  // Dark Green
-        if (wins >= 250) return "§a";  // Green
-        if (wins >= 50) return "§f";  // White
-        return "§7"; // Gray
+        if (wins >= 50000) return "§5";
+        if (wins >= 25000) return "§d";
+        if (wins >= 10000) return "§4";
+        if (wins >= 5000) return "§c";
+        if (wins >= 2500) return "§6";
+        if (wins >= 1000) return "§e";
+        if (wins >= 500) return "§2";
+        if (wins >= 250) return "§a";
+        if (wins >= 50) return "§f";
+        return "§7";
     }
 
     private static String getFinalsColor(int finals) {
-        if (finals >= 100000) return "§5"; // Dark Purple
-        if (finals >= 50000) return "§d"; // Light Purple
-        if (finals >= 25000) return "§4"; // Dark Red
-        if (finals >= 10000) return "§c"; // Red
-        if (finals >= 5000) return "§6"; // Gold
-        if (finals >= 2500) return "§e"; // Yellow
-        if (finals >= 1000) return "§2";  // Dark Green
-        if (finals >= 500) return "§a";  // Green
-        if (finals >= 100) return "§f";  // White
-        return "§7"; // Gray
+        if (finals >= 100000) return "§5";
+        if (finals >= 50000) return "§d";
+        if (finals >= 25000) return "§4";
+        if (finals >= 10000) return "§c";
+        if (finals >= 5000) return "§6";
+        if (finals >= 2500) return "§e";
+        if (finals >= 1000) return "§2";
+        if (finals >= 500) return "§a";
+        if (finals >= 100) return "§f";
+        return "§7";
+    }
+
+    private static String getWsColor(int ws) {
+        if (ws >= 100) return "§4";
+        if (ws >= 50) return "§6";
+        if (ws >= 25) return "§e";
+        if (ws >= 10) return "§a";
+        if (ws >= 5) return "§2";
+        return "§7";
     }
 
     private static int getInt(JsonObject obj, String memberName) {
-        if (obj.has(memberName)) {
-            return obj.get(memberName).getAsInt();
-        }
-        return 0;
+        return obj.has(memberName) ? obj.get(memberName).getAsInt() : 0;
     }
 
     private static String formatStats(JsonObject player, BedwarsStatsConfig.BedwarsMode mode) {
+        BedwarsStatsConfig config = AutoConfig.getConfigHolder(BedwarsStatsConfig.class).getConfig();
         String prefix = mode.getApiPrefix();
-
         String username = player.get("displayname").getAsString();
-        String rankPrefix = getRankPrefix(player);
+        String rankPrefix = config.showRankPrefix ? getRankPrefix(player) : "";
 
         if (!player.has("stats") || player.get("stats").isJsonNull() || !player.getAsJsonObject("stats").has("Bedwars")) {
             return rankPrefix + username + "§7: No Bedwars stats found.";
         }
 
         JsonObject bedwars = player.getAsJsonObject("stats").getAsJsonObject("Bedwars");
-
-        int stars = (player.has("achievements") && player.getAsJsonObject("achievements").has("bedwars_level"))
-                ? player.getAsJsonObject("achievements").get("bedwars_level").getAsInt() : 0;
+        int stars = getInt(player.getAsJsonObject("achievements"), "bedwars_level");
         int wins = getInt(bedwars, prefix + "wins_bedwars");
         int losses = getInt(bedwars, prefix + "losses_bedwars");
         int finalKills = getInt(bedwars, prefix + "final_kills_bedwars");
         int finalDeaths = getInt(bedwars, prefix + "final_deaths_bedwars");
+        int winstreak = getInt(bedwars, prefix + "winstreak");
 
         double wlr = (losses == 0) ? wins : (double) wins / losses;
         double fkdr = (finalDeaths == 0) ? finalKills : (double) finalKills / finalDeaths;
@@ -214,43 +213,30 @@ public class HypixelApiHandler {
         String wlrColor = getWlrColor(wlr);
         String finalsColor = getFinalsColor(finalKills);
         String fkdrColor = getFkdrColor(fkdr);
+        String wsColor = getWsColor(winstreak);
 
-        return String.format("%s %s%s§r §7[%s]§r: Wins %s%s§r | WLR %s%.2f§r | Finals %s%s§r | FKDR %s%.2f",
-                prestige,
-                rankPrefix,
-                username,
-                mode.getDisplayName(),
-                winsColor, formatNumber(wins),
-                wlrColor, wlr,
-                finalsColor, formatNumber(finalKills),
-                fkdrColor, fkdr);
+        return String.format("%s %s%s§r §7[%s]§r: Wins %s%s§r | WLR %s%.2f§r | Finals %s%s§r | FKDR %s%.2f§r | WS %s%d",
+                prestige, rankPrefix, username, mode.getDisplayName(),
+                winsColor, formatNumber(wins), wlrColor, wlr,
+                finalsColor, formatNumber(finalKills), fkdrColor, fkdr,
+                wsColor, winstreak);
     }
-    
-    // ★★★ 3. getRankPrefixメソッドを最新版に更新 ★★★
+
     private static String getRankPrefix(JsonObject player) {
-        // 関連する全てのランク情報を取得
         String rank = player.has("rank") && !player.get("rank").getAsString().equals("NORMAL") ? player.get("rank").getAsString() : null;
         String monthlyPackageRank = player.has("monthlyPackageRank") && !player.get("monthlyPackageRank").getAsString().equals("NONE") ? player.get("monthlyPackageRank").getAsString() : null;
         String newPackageRank = player.has("newPackageRank") && !player.get("newPackageRank").getAsString().equals("NONE") ? player.get("newPackageRank").getAsString() : null;
         String rankPlusColorStr = player.has("rankPlusColor") ? player.get("rankPlusColor").getAsString() : null;
 
-        // 優先度1: スタッフランクやYoutuberランクを最優先でチェック
         if (rank != null) {
             switch (rank) {
-                case "YOUTUBER":
-                    return "§c[§fYOUTUBE§c] ";
-                // ★★★ "ADMIN", "OWNER" などを "STAFF" に置き換え ★★★
-                case "STAFF":
-                    return "§c[§6ዞ§c] ";
+                case "YOUTUBER": return "§c[§fYOUTUBE§c] ";
+                case "STAFF": return "§c[§6ዞ§c] ";
             }
         }
 
-        // 優先度2: 購入したランクをチェック
         String displayRank = monthlyPackageRank != null ? monthlyPackageRank : newPackageRank;
-
-        if (displayRank == null) {
-            return "§7"; // No rank
-        }
+        if (displayRank == null) return "§7";
 
         String plusColor = "§c";
         if (rankPlusColorStr != null) {
@@ -258,7 +244,6 @@ public class HypixelApiHandler {
                 plusColor = "§" + Formatting.valueOf(rankPlusColorStr).getCode();
             } catch (IllegalArgumentException e) {
                 plusColor = "§c";
-
             }
         }
 
@@ -271,6 +256,7 @@ public class HypixelApiHandler {
             default: return "§7";
         }
     }
+
     private static String sendHttpRequest(String urlString, String apiKey) throws Exception {
         URL url = new URL(urlString);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();

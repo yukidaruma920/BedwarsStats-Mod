@@ -1,7 +1,6 @@
 package com.yuki920.bedwarsstats;
 
 import com.yuki920.bedwarsstats.commands.BwmCommand;
-import com.yuki920.bedwarsstats.commands.BwmCommand;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
