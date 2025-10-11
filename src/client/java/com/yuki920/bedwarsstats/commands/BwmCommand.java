@@ -13,15 +13,20 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class BwmCommand {
 
-    private static final SuggestionProvider<FabricClientCommandSource> MODE_SUGGESTIONS = (context, builder) ->
-            CommandSource.suggestMatching(
-                    Arrays.stream(BedwarsStatsConfig.BedwarsMode.values()).map(Enum::name),
-                    builder
-            );
+    private static final SuggestionProvider<FabricClientCommandSource> MODE_SUGGESTIONS = (context, builder) -> {
+        List<String> suggestions = new ArrayList<>();
+        for (BedwarsStatsConfig.BedwarsMode mode : BedwarsStatsConfig.BedwarsMode.values()) {
+            suggestions.add(mode.name());
+            suggestions.addAll(Arrays.asList(mode.getAliases()));
+        }
+        return CommandSource.suggestMatching(suggestions, builder);
+    };
 
     private static final SuggestionProvider<FabricClientCommandSource> ONLINE_PLAYER_SUGGESTIONS = (context, builder) ->
             CommandSource.suggestMatching(context.getSource().getPlayerNames(), builder);
@@ -45,9 +50,9 @@ public class BwmCommand {
                         .suggests(MODE_SUGGESTIONS)
                         .executes(context -> {
                             String username = StringArgumentType.getString(context, "username");
-                            String modeStr = StringArgumentType.getString(context, "mode").toUpperCase();
+                            String modeStr = StringArgumentType.getString(context, "mode");
                             try {
-                                BedwarsStatsConfig.BedwarsMode mode = BedwarsStatsConfig.BedwarsMode.valueOf(modeStr);
+                                BedwarsStatsConfig.BedwarsMode mode = BedwarsStatsConfig.BedwarsMode.fromString(modeStr);
                                 HypixelApiHandler.processPlayer(username, mode);
                             } catch (IllegalArgumentException e) {
                                 context.getSource().sendFeedback(Text.literal("§cInvalid mode. Use tab-completion for suggestions."));
@@ -59,7 +64,7 @@ public class BwmCommand {
             )
             .then(ClientCommandManager.literal("settings")
                 .executes(context -> {
-                    context.getSource().sendFeedback(Text.literal("§cUsage: /bwm settings <apikey|mode|nick|showrank>"));
+                    context.getSource().sendFeedback(Text.literal("§cUsage: /bwm settings <apikey|mode|nick|showrank|displayorder>"));
                     return 1;
                 })
                 .then(ClientCommandManager.literal("apikey")
@@ -78,9 +83,9 @@ public class BwmCommand {
                     .then(ClientCommandManager.argument("mode", StringArgumentType.string())
                         .suggests(MODE_SUGGESTIONS)
                         .executes(context -> {
-                            String modeStr = StringArgumentType.getString(context, "mode").toUpperCase();
+                            String modeStr = StringArgumentType.getString(context, "mode");
                             try {
-                                BedwarsStatsConfig.BedwarsMode mode = BedwarsStatsConfig.BedwarsMode.valueOf(modeStr);
+                                BedwarsStatsConfig.BedwarsMode mode = BedwarsStatsConfig.BedwarsMode.fromString(modeStr);
                                 BedwarsStatsConfig config = AutoConfig.getConfigHolder(BedwarsStatsConfig.class).getConfig();
                                 config.bedwarsMode = mode;
                                 AutoConfig.getConfigHolder(BedwarsStatsConfig.class).save();
@@ -112,6 +117,29 @@ public class BwmCommand {
                             config.showRankPrefix = enabled;
                             AutoConfig.getConfigHolder(BedwarsStatsConfig.class).save();
                             context.getSource().sendFeedback(Text.literal("§aRank prefix display set to: " + enabled));
+                            return 1;
+                        })
+                    )
+                )
+                .then(ClientCommandManager.literal("displayorder")
+                    .then(ClientCommandManager.argument("order", StringArgumentType.greedyString())
+                        .executes(context -> {
+                            String orderStr = StringArgumentType.getString(context, "order");
+                            String[] stats = orderStr.split(",");
+                            List<String> validStats = new ArrayList<>();
+                            for (String stat : stats) {
+                                try {
+                                    BedwarsStatsConfig.Stat.valueOf(stat.trim().toUpperCase());
+                                    validStats.add(stat.trim().toUpperCase());
+                                } catch (IllegalArgumentException e) {
+                                    context.getSource().sendError(Text.literal("§cInvalid stat: " + stat));
+                                    return 0;
+                                }
+                            }
+                            BedwarsStatsConfig config = AutoConfig.getConfigHolder(BedwarsStatsConfig.class).getConfig();
+                            config.displayOrder = String.join(",", validStats);
+                            AutoConfig.getConfigHolder(BedwarsStatsConfig.class).save();
+                            context.getSource().sendFeedback(Text.literal("§aDisplay order set to: " + config.displayOrder));
                             return 1;
                         })
                     )
