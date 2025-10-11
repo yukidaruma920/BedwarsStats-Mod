@@ -3,6 +3,7 @@ package com.yuki920.bedwarsstats.commands;
 import com.yuki920.bedwarsstats.HypixelApiHandler;
 import com.yuki920.bedwarsstats.config.BedwarsStatsConfig;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import me.shedaniel.autoconfig.AutoConfig;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -34,10 +35,9 @@ public class BwmCommand {
             })
             .then(ClientCommandManager.literal("stats")
                 .then(ClientCommandManager.argument("username", StringArgumentType.string())
-                    .suggests(ONLINE_PLAYER_SUGGESTIONS) // Suggest online players
+                    .suggests(ONLINE_PLAYER_SUGGESTIONS)
                     .executes(context -> {
                         String username = StringArgumentType.getString(context, "username");
-                        // No mode specified, use the one from config
                         HypixelApiHandler.processPlayer(username);
                         return 1;
                     })
@@ -48,7 +48,6 @@ public class BwmCommand {
                             String modeStr = StringArgumentType.getString(context, "mode").toUpperCase();
                             try {
                                 BedwarsStatsConfig.BedwarsMode mode = BedwarsStatsConfig.BedwarsMode.valueOf(modeStr);
-                                // Mode specified, use it for this lookup
                                 HypixelApiHandler.processPlayer(username, mode);
                             } catch (IllegalArgumentException e) {
                                 context.getSource().sendFeedback(Text.literal("§cInvalid mode. Use tab-completion for suggestions."));
@@ -60,7 +59,7 @@ public class BwmCommand {
             )
             .then(ClientCommandManager.literal("settings")
                 .executes(context -> {
-                    context.getSource().sendFeedback(Text.literal("§cUsage: /bwm settings <apikey|mode|nick>"));
+                    context.getSource().sendFeedback(Text.literal("§cUsage: /bwm settings <apikey|mode|nick|showrank>"));
                     return 1;
                 })
                 .then(ClientCommandManager.literal("apikey")
@@ -101,6 +100,18 @@ public class BwmCommand {
                             config.myNick = nick;
                             AutoConfig.getConfigHolder(BedwarsStatsConfig.class).save();
                             context.getSource().sendFeedback(Text.literal("§aYour nick has been set to: " + nick));
+                            return 1;
+                        })
+                    )
+                )
+                .then(ClientCommandManager.literal("showrank")
+                    .then(ClientCommandManager.argument("enabled", BoolArgumentType.bool())
+                        .executes(context -> {
+                            boolean enabled = BoolArgumentType.getBool(context, "enabled");
+                            BedwarsStatsConfig config = AutoConfig.getConfigHolder(BedwarsStatsConfig.class).getConfig();
+                            config.showRankPrefix = enabled;
+                            AutoConfig.getConfigHolder(BedwarsStatsConfig.class).save();
+                            context.getSource().sendFeedback(Text.literal("§aRank prefix display set to: " + enabled));
                             return 1;
                         })
                     )

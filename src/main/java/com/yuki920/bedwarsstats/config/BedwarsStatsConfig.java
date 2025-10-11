@@ -18,12 +18,16 @@ public class BedwarsStatsConfig implements ConfigData {
     @Comment("If you are nicked, enter your nick here to see your own stats.")
     public String myNick = "";
 
+    @Comment("Show player rank prefix in stats display.")
+    public boolean showRankPrefix = true;
+
     public enum BedwarsMode {
         OVERALL("Overall", ""),
         SOLO("Solo", "eight_one_"),
         DOUBLES("Doubles", "eight_two_"),
         THREES("Threes", "four_three_"),
-        FOURS("Fours", "four_four_");
+        FOURS("Fours", "four_four_"),
+        FOUR_V_FOUR("4v4", "two_four_");
 
         private final String displayName;
         private final String apiPrefix;
