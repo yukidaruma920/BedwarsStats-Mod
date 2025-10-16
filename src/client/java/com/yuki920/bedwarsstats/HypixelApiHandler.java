@@ -175,11 +175,15 @@ public class HypixelApiHandler {
     }
 
     private static String getWsColor(int ws) {
+        if (ws >= 300) return "§5";
+        if (ws >= 200) return "§d";
         if (ws >= 100) return "§4";
-        if (ws >= 50) return "§6";
-        if (ws >= 25) return "§e";
-        if (ws >= 10) return "§a";
-        if (ws >= 5) return "§2";
+        if (ws >= 60) return "§c";
+        if (ws >= 40) return "§6";
+        if (ws >= 20) return "§e";
+        if (ws >= 10) return "§2";
+        if (ws >= 5) return "§a";
+        if (ws >= 2) return "§f";
         return "§7";
     }
 
