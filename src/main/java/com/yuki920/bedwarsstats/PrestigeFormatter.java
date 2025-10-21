@@ -61,7 +61,6 @@ public class PrestigeFormatter {
     }
 
     public static String formatPrestige(int stars) {
-        // § is written as \u00A7 in Java, so we convert the color codes
         if (stars < 100) return "§7[" + stars + "✫]§f";
         
         for (PrestigePattern p : patterns) {
