@@ -1,0 +1,16 @@
+[
+{
+  "modid": "bedwarsstats",
+  "name": "Bedwars Stats",
+  "description": "Displays Hypixel Bedwars stats of players.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["yuki920"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
