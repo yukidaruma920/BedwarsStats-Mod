@@ -11,8 +11,8 @@ jobs:
     strategy:
       matrix:
         project:
-          - { name: "Fabric 1.21.5", path: "fabric_1.21.5", java: "21" }
-          - { name: "Forge 1.8.9", path: "forge_1.8.9", java: "8" }
+          - { name: "Fabric 1.21.5", path: "fabric_1.21.5", java: "21", distribution: "microsoft" }
+          - { name: "Forge 1.8.9", path: "forge_1.8.9", java: "8", distribution: "temurin" }
 
     runs-on: ubuntu-24.04
 
@@ -22,12 +22,15 @@ jobs:
 
       - name: validate gradle wrapper
         uses: gradle/actions/wrapper-validation@v4
+        with:
+          min-wrapper-count: 1
+        working-directory: ${{ matrix.project.path }}
 
       - name: setup jdk ${{ matrix.project.java }}
         uses: actions/setup-java@v4
         with:
           java-version: ${{ matrix.project.java }}
-          distribution: 'microsoft'
+          distribution: ${{ matrix.project.distribution }}
 
       - name: make gradle wrapper executable
         working-directory: ${{ matrix.project.path }}
