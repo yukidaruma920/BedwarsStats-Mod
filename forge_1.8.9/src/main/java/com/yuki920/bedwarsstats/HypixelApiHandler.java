@@ -21,7 +21,7 @@ public class HypixelApiHandler {
     public static void checkApiKeyValidity() {
         CompletableFuture.runAsync(() -> {
             try {
-                String apiKey = BedwarsStatsConfig.apiKey;
+                String apiKey = BedwarsStatsConfig.getApiKey();
                 if (apiKey == null || apiKey.isEmpty()) return;
                 String response = sendHttpRequest(HYPIXEL_KEY_API_URL, apiKey);
                 if (response == null) return;
@@ -37,14 +37,14 @@ public class HypixelApiHandler {
     }
 
     public static void processPlayer(String username) {
-        BedwarsStatsConfig.BedwarsMode mode = BedwarsStatsConfig.BedwarsMode.fromString(BedwarsStatsConfig.bedwarsMode);
+        BedwarsStatsConfig.BedwarsMode mode = BedwarsStatsConfig.BedwarsMode.fromString(BedwarsStatsConfig.getBedwarsMode());
         processPlayer(username, mode);
     }
 
     public static void processPlayer(String username, BedwarsStatsConfig.BedwarsMode mode) {
         CompletableFuture.runAsync(() -> {
             try {
-                String myNick = BedwarsStatsConfig.myNick;
+                String myNick = BedwarsStatsConfig.getMyNick();
                 if (myNick != null && !myNick.isEmpty() && myNick.equalsIgnoreCase(username)) {
                     Minecraft client = Minecraft.getMinecraft();
                     if (client.thePlayer != null) {
@@ -73,7 +73,7 @@ public class HypixelApiHandler {
     }
 
     private static void fetchAndDisplayStats(String uuid, String displayUsername, BedwarsStatsConfig.BedwarsMode mode) throws Exception {
-        String apiKey = BedwarsStatsConfig.apiKey;
+        String apiKey = BedwarsStatsConfig.getApiKey();
         if (apiKey == null || apiKey.isEmpty()) {
             sendMessageToPlayer(EnumChatFormatting.RED + "Hypixel API Key not set!");
             return;
@@ -108,7 +108,7 @@ public class HypixelApiHandler {
         String prefix = mode.getApiPrefix();
         String username = player.get("displayname").getAsString();
         String rankColor = getRankColor(player);
-        String rankPrefixText = BedwarsStatsConfig.showRankPrefix ? getRankPrefix(player) : "";
+        String rankPrefixText = BedwarsStatsConfig.getShowRankPrefix() ? getRankPrefix(player) : "";
 
         if (!player.has("stats") || player.get("stats").isJsonNull() || !player.getAsJsonObject("stats").has("Bedwars")) {
             return rankPrefixText + rankColor + username + EnumChatFormatting.GRAY + ": No Bedwars stats found.";
@@ -128,7 +128,7 @@ public class HypixelApiHandler {
         String prestige = PrestigeFormatter.formatPrestige(stars);
 
         StringBuilder statsBuilder = new StringBuilder();
-        String[] displayOrder = BedwarsStatsConfig.displayOrder.split(",");
+        String[] displayOrder = BedwarsStatsConfig.getDisplayOrder().split(",");
         for (int i = 0; i < displayOrder.length; i++) {
             try {
                 BedwarsStatsConfig.Stat stat = BedwarsStatsConfig.Stat.valueOf(displayOrder[i].trim().toUpperCase());

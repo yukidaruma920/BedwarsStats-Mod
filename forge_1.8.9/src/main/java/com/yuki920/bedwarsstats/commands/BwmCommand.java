@@ -78,7 +78,7 @@ public class BwmCommand extends CommandBase {
             return;
         }
         String setting = args[0];
-        if (args.length < 2) {
+        if (args.length < 2 && !setting.equalsIgnoreCase("help")) {
             sender.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Usage: /bwm settings <setting> <value>"));
             return;
         }
@@ -86,38 +86,35 @@ public class BwmCommand extends CommandBase {
 
         switch(setting.toLowerCase()) {
             case "apikey":
-                BedwarsStatsConfig.apiKey = value;
+                BedwarsStatsConfig.setApiKey(value);
                 sender.addChatMessage(new ChatComponentText(EnumChatFormatting.GREEN + "API Key set successfully!"));
                 break;
             case "mode":
                 try {
+                    // Validate the mode exists before setting it
                     BedwarsStatsConfig.BedwarsMode mode = BedwarsStatsConfig.BedwarsMode.fromString(value);
-                    BedwarsStatsConfig.bedwarsMode = mode.name();
+                    BedwarsStatsConfig.setBedwarsMode(mode.name());
                     sender.addChatMessage(new ChatComponentText(EnumChatFormatting.GREEN + "Bedwars mode set to " + mode.getDisplayName()));
                 } catch (IllegalArgumentException e) {
                     sender.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Invalid mode."));
                 }
                 break;
             case "nick":
-                BedwarsStatsConfig.myNick = value;
+                BedwarsStatsConfig.setMyNick(value);
                 sender.addChatMessage(new ChatComponentText(EnumChatFormatting.GREEN + "Your nick has been set to: " + value));
                 break;
             case "showrank":
-                BedwarsStatsConfig.showRankPrefix = Boolean.parseBoolean(value);
-                sender.addChatMessage(new ChatComponentText(EnumChatFormatting.GREEN + "Rank prefix display set to: " + value));
+                boolean showRank = Boolean.parseBoolean(value);
+                BedwarsStatsConfig.setShowRankPrefix(showRank);
+                sender.addChatMessage(new ChatComponentText(EnumChatFormatting.GREEN + "Rank prefix display set to: " + showRank));
                 break;
             case "displayorder":
-                BedwarsStatsConfig.displayOrder = value;
+                BedwarsStatsConfig.setDisplayOrder(value);
                 sender.addChatMessage(new ChatComponentText(EnumChatFormatting.GREEN + "Display order set to: " + value));
                 break;
             default:
                 sender.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Unknown setting."));
                 break;
-        }
-
-        // Save the config
-        if(BedwarsStatsConfig.config.hasChanged()){
-            BedwarsStatsConfig.config.save();
         }
     }
 

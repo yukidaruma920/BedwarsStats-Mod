@@ -74,6 +74,10 @@ jar {
 	}
 }
 
+tasks.withType(net.fabricmc.loom.task.RemapJarTask).configureEach {
+    it.archiveFileName.set("BedwarsStats-Fabric-${project.mod_version}+${project.minecraft_version}.jar")
+}
+
 // configure the maven publication
 publishing {
 	publications {

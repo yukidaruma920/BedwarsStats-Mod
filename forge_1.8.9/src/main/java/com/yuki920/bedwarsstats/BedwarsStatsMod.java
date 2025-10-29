@@ -13,7 +13,7 @@ import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(modid = BedwarsStatsMod.MOD_ID, version = BedwarsStatsMod.VERSION, name = BedwarsStatsMod.NAME)
+@Mod(modid = BedwarsStatsMod.MOD_ID, version = BedwarsStatsMod.VERSION, name = BedwarsStatsMod.NAME, guiFactory = "com.yuki920.bedwarsstats.config.BedwarsStatsGuiFactory")
 public class BedwarsStatsMod {
     public static final String MOD_ID = "bedwarsstats";
     public static final String VERSION = "1.4.2";
